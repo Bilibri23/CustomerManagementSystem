@@ -1,0 +1,61 @@
+services:
+  db:
+    container_name: postgres
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      PGDATA: /data/postgres
+    volumes:
+      - postgres:/data/postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - postgres
+    restart: unless-stopped
+
+  brian-api:
+    container_name: brian-api
+    image: bilibri23/brian-api
+    environment:
+       SPRING_DATASOURCE_URL: jdbc:postgresql://awseb-e-bppxd7rtgi-stack-awsebrdsdatabase-835awuvaasci.cjq0wuc0y6oq.us-east-1.rds.amazonaws.com:5432/customer
+       SPRING_DATASOURCE_USERNAME: postgres
+       SPRING_DATASOURCE_PASSWORD: password
+    ports:
+      - "80:8080"
+    networks:
+      - postgres
+    depends_on:
+      - db
+    restart: unless-stopped
+
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    networks:
+      - postgres
+    restart: unless-stopped
+    depends_on:
+      - db
+
+networks:
+  postgres:
+    driver: bridge
+
+volumes:
+  postgres:
+  pgadmin:
+
+
+
+#I cannot type this command everytime i want to test things locally  I will add configs in my docker compose file to spin my container up when I want
+#docker run --name brian-api --rm -p 8080:8080 --network cms_postgres  bilibri23/brian-api --spring.datasource.url=jdbc:postgresql://db:5432/customer

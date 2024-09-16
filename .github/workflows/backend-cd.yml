@@ -52,7 +52,7 @@ jobs:
         run: |
           echo "docker-compose.yml before updating tag"
           cat ../docker-compose.yml
-          sed -i -E 's_(bilibri23/brian-api:)([^"]*)_\1'${{steps.build-number.outputs.BUILD_NUMBER}}'_' ../docker-compose.yml
+          sed -i -E 's_(bilibri23/brian-api:)([^"]*)_\1'${{steps.build-number.outputs.BUILD_NUMBER}}'_' docker-compose.yml
           echo "docker-compose.yml after updating tag"
           cat ../docker-compose.yml
 

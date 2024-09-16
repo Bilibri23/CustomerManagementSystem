@@ -48,13 +48,13 @@ jobs:
         run: echo "BUILD_NUMBER=$(date '+%d.%m.%Y.%H.%M.%S')" >> $GITHUB_OUTPUT
       - name: Build Package Push with Maven
         run: mvn -ntp -B verify -Ddocker.image.tag=${{steps.build-number.outputs.BUILD_NUMBER}} jib:build
-      - name: Update Dockerrun.aws.json api image tag with new build number
+      - name: Update docker-compose.yml api image tag with new build number
         run: |
-          echo "Dockerrun.aws.json before updating tag"
-          cat ../Dockerrun.aws.json
-          sed -i -E 's_(bilibri23/brian-api:)([^"]*)_\1'${{steps.build-number.outputs.BUILD_NUMBER}}'_' ../Dockerrun.aws.json
-          echo "Dockerrun.aws.json after updating tag"
-          cat ../Dockerrun.aws.json
+          echo "docker-compose.yml before updating tag"
+          cat ../docker-compose.yml
+          sed -i -E 's_(bilibri23/brian-api:)([^"]*)_\1'${{steps.build-number.outputs.BUILD_NUMBER}}'_' ../docker-compose.yml
+          echo "docker-compose.yml after updating tag"
+          cat ../docker-compose.yml
 
       - name: Deploy to Elastic Beanstalk
         uses: einaregilsson/beanstalk-deploy@v21
@@ -66,12 +66,12 @@ jobs:
             version_label: ${{ steps.build-number.outputs.BUILD_NUMBER }}
             version_description: ${{ github.SHA }}
             region: ${{ secrets.EB_REGION }}
-            deployment_package: Dockerrun.aws.json
+            deployment_package: docker-compose.yml
 
-      - name: Commit and push Dockerrun.aws.json
+      - name: Commit and push docker-compose.yml
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git add ../Dockerrun.aws.json
-          git commit -m "Update Dockerrun.aws.json docker image with new tag ${{ steps.build-number.outputs.BUILD_NUMBER}}"
+          git add ../docker-compose.yml
+          git commit -m "Update docker-compose.yml docker image with new tag ${{ steps.build-number.outputs.BUILD_NUMBER}}"
           git push

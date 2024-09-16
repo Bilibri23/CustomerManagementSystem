@@ -11,10 +11,10 @@
     <groupId>com.brian</groupId>
     <artifactId>brian-api</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <organization>
-       <name>bilibri23</name>  <!-- docker hub username-->
-        <url>https://brian.com</url>
-    </organization>
+<!--    <organization>-->
+<!--       <name>bilibri23</name>  &lt;!&ndash; docker hub username&ndash;&gt;-->
+<!--        <url>https://brian.com</url>-->
+<!--    </organization>-->
     <name>CMS</name>
     <description>CMS</description>
     <url/>
@@ -33,7 +33,9 @@
 
     <properties>
         <java.version>17</java.version>
-<!--        <docker.username>bilibri23</docker.username> incase ur docker username was different from the organization name-->
+       <docker.username>bilibri23</docker.username> <!--incase ur docker username was different from the organization -->
+        <docker.image.name>brian-api</docker.image.name>
+        <docker.image.tag/>
     </properties>
 
     <dependencies>
@@ -162,7 +164,7 @@
                         </platforms>
                     </from>
                     <to>
-                        <image>docker.io/${project.organization.name}/${project.artifactId}:${project.version}</image>  <!--this is the image we will create in our docker hub account-->
+                        <image>docker.io/${docker.username}/${docker.image.name}:${docker.image.tag}</image>  <!--this is the image we will create in our docker hub account-->
                         <tags>
                             <tag>latest</tag>
                         </tags>

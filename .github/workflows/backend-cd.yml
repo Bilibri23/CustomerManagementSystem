@@ -52,6 +52,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PAT}}
+
       - name: Set build number
         id: build-number
         run: echo "BUILD_NUMBER=$(date '+%d.%m.%Y.%H.%M.%S')" >> $GITHUB_OUTPUT
@@ -66,6 +67,14 @@ jobs:
 #          cat ../Dockerrun.aws.json
 
           # Deploy using docker-compose.yml
+
+      # Set up AWS CLI credentials
+      - name: Configure AWS credentials
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws configure set default.region ${{ secrets.EB_REGION }}
+
       - name: Deploy to Elastic Beanstalk
         run: |
             eb init -p docker ${{ secrets.EB_APPLICATION_NAME }} --region ${{ secrets.EB_REGION }}

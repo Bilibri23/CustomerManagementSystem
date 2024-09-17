@@ -65,6 +65,7 @@ jobs:
           aws configure set default.region ${{ secrets.EB_REGION }}
 
       - name: Deploy to Elastic Beanstalk
+        working-directory: ./backend
         run: |
           eb init -p docker ${{ secrets.EB_APPLICATION_NAME }} --region ${{ secrets.EB_REGION }}
           sleep 5

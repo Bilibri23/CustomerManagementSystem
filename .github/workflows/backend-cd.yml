@@ -78,7 +78,9 @@ jobs:
       - name: Deploy to Elastic Beanstalk
         run: |
             eb init -p docker ${{ secrets.EB_APPLICATION_NAME }} --region ${{ secrets.EB_REGION }}
+            sleep 5
             eb use ${{ secrets.EB_ENVIRONMENT_NAME }}
+            sleep 5
             eb deploy --staged --region ${{ secrets.EB_REGION }}
 
       - name: Commit and push docker-compose.yml

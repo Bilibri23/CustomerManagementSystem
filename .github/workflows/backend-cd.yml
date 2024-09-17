@@ -65,7 +65,6 @@ jobs:
           aws configure set default.region ${{ secrets.EB_REGION }}
 
       - name: Deploy to Elastic Beanstalk
-        working-directory: ./backend
         run: |
           eb init -p docker ${{ secrets.EB_APPLICATION_NAME }} --region ${{ secrets.EB_REGION }}
           sleep 5
@@ -74,10 +73,9 @@ jobs:
           eb deploy --staged --region ${{ secrets.EB_REGION }}
 
       - name: Commit and push docker-compose.yml
-        working-directory: ./backend
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git add docker-compose.yml
+          git add .
           git commit -m "Update docker-compose.yml with new tag ${{ steps.build-number.outputs.BUILD_NUMBER }}"
           git push

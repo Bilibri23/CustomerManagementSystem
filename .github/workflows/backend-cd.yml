@@ -56,22 +56,17 @@ jobs:
 #          echo "Dockerrun.aws.json after updating tag"
 #          cat ../Dockerrun.aws.json
 
+          # Deploy using docker-compose.yml
       - name: Deploy to Elastic Beanstalk
-        uses: einaregilsson/beanstalk-deploy@v21
-        with:
-            aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-            aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            application_name: ${{ secrets.EB_APPLICATION_NAME }}
-            environment_name: ${{ secrets.EB_ENVIRONMENT_NAME }}
-            version_label: ${{ steps.build-number.outputs.BUILD_NUMBER }}
-            version_description: ${{ github.SHA }}
-            region: ${{ secrets.EB_REGION }}
-            deployment_package: Dockerrun.aws.json
+        run: |
+            eb init -p docker ${{ secrets.EB_APPLICATION_NAME }} --region ${{ secrets.EB_REGION }}
+            eb use ${{ secrets.EB_ENVIRONMENT_NAME }}
+            eb deploy --staged --region ${{ secrets.EB_REGION }}
 
-      - name: Commit and push Dockerrun.aws.json
+      - name: Commit and push docker-compose.yml
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git add ../Dockerrun.aws.json
-          git commit -m "Update Dockerrun.aws.json docker image with new tag ${{ steps.build-number.outputs.BUILD_NUMBER}}"
+          git add ./docker-compose.yml
+          git commit -m "Update docker-compose.yml with new tag ${{ steps.build-number.outputs.BUILD_NUMBER }}"
           git push

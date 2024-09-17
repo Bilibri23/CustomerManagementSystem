@@ -33,6 +33,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+        # Install Elastic Beanstalk CLI
+      - name: Install EB CLI
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y python3-pip
+          pip3 install --user awsebcli
+          echo "export PATH=$HOME/.local/bin:$PATH" >> $GITHUB_ENV
+          source $GITHUB_ENV
+
       - uses: actions/setup-java@v3
         with:
           distribution: 'temurin'

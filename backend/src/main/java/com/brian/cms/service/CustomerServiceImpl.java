@@ -1,36 +1,54 @@
 package com.brian.cms.service;
 
+import Dto.CustomerDTO;
 import com.brian.cms.Exception.DuplicateResourceException;
 import com.brian.cms.Exception.RequestValidationException;
 import com.brian.cms.Exception.ResourceNotFoundException;
 import com.brian.cms.model.Customer;
 import com.brian.cms.model.CustomerRegistrationRequest;
+import com.brian.cms.model.Gender;
 import com.brian.cms.model.UpdateCustomerRegistrationRequest;
 import com.brian.cms.repository.CustomerDao;
-import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class CustomerServiceImpl  implements CustomerService {
 
     private final CustomerDao customerDao;
-    /** private final CustomerService customerService;  lol remove this, the class implements already customer service, how can u
+    private final CustomerDTOMapper customerDTOMapper;
+    private final PasswordEncoder passwordEncoder;
+
+    public CustomerServiceImpl(CustomerDao customerDao,CustomerDTOMapper customerDTOMapper, PasswordEncoder passwordEncoder){
+        this.customerDao = customerDao;
+        this.customerDTOMapper = customerDTOMapper;
+        this.passwordEncoder =passwordEncoder;
+    }
+
+
+    /** private final  customerService;  lol remove this, the class implements already customer service, how can u
       make it to depend on it again, it creates circular reference, as customer controller depends on service and impl depends on service again
      meanwhile it is the implementation,
      */
 
 
+
     @Override
-    public List<Customer> getAllCustomers() {
-        return customerDao.findAll();
+    public List<CustomerDTO> getAllCustomers() {
+        //mapping each row of type customer to CustomerDTO for the client
+        return customerDao.findAll().stream().map(customerDTOMapper)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Customer getCustomerByID(Integer id) {
-        return customerDao.findById(id).orElseThrow(() -> new ResourceNotFoundException("The customer  not found with  id [%s]".formatted(id)));
+    public CustomerDTO getCustomerByID(Integer id) {
+        return customerDao.findById(id)
+                .map(customerDTOMapper)
+                .orElseThrow(() -> new ResourceNotFoundException("The customer  not found with  id [%s]".formatted(id)));
     }
 
     @Override
@@ -50,8 +68,8 @@ public class CustomerServiceImpl  implements CustomerService {
         saveCustomer(
                 new Customer(customerRegistrationRequest.name(),
                         customerRegistrationRequest.email(),
-                        customerRegistrationRequest.age()
-                ));
+                        customerRegistrationRequest.age(),
+                        Gender.MALE, passwordEncoder.encode(customerRegistrationRequest.password())));
     }
 
 
@@ -77,9 +95,11 @@ public class CustomerServiceImpl  implements CustomerService {
     }
 
     @Override
-    public void UpdateCustomer(Integer id, UpdateCustomerRegistrationRequest updateRequest) {
+    public void UpdateCustomer(Integer customerId, UpdateCustomerRegistrationRequest updateRequest) {
 
-        Customer customer = getCustomerByID(id);
+       Customer customer = customerDao.findById(customerId)
+                .orElseThrow(() -> new ResourceNotFoundException("The customer  not found with  id [%s]".formatted(customerId)));
+
         boolean changes = false;
 
         if (updateRequest.name() != null && !updateRequest.name().equals(customer.getName())) {
@@ -104,5 +124,10 @@ public class CustomerServiceImpl  implements CustomerService {
 
         customerDao.save(customer);
 
+    }
+
+    @Override
+    public Optional<Customer> selectedUserByEmail(String email) {
+        return customerDao.findCustomerByEmail(email);
     }
 }

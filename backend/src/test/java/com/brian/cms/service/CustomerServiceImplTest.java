@@ -1,28 +1,24 @@
 package com.brian.cms.service;
 
-import com.brian.cms.Exception.DuplicateResourceException;
-import com.brian.cms.Exception.RequestValidationException;
+
+import Dto.CustomerDTO;
 import com.brian.cms.Exception.ResourceNotFoundException;
 import com.brian.cms.model.Customer;
-import com.brian.cms.model.CustomerRegistrationRequest;
-import com.brian.cms.model.UpdateCustomerRegistrationRequest;
 import com.brian.cms.repository.CustomerDao;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
+import static com.brian.cms.model.Gender.MALE;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,11 +27,12 @@ class CustomerServiceImplTest {
     private  CustomerDao customerDao;
     private CustomerServiceImpl underTest;
     @Mock
-    private CustomerService customerService;
+    private  final CustomerDTOMapper customerDTOMapper = new CustomerDTOMapper();
+    private  final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @BeforeEach
     void setUp() {
-         underTest = new CustomerServiceImpl(customerDao);
+         underTest = new CustomerServiceImpl(customerDao,customerDTOMapper,passwordEncoder);
     }
 
 
@@ -53,15 +50,16 @@ class CustomerServiceImplTest {
         //Given
         int id = 10;
         Customer customer = new Customer(
-                id, "Alex", "alex@gmail.com", 19
+                id, "Alex", "alex@gmail.com", 19, MALE,"password"
         );
         when(customerDao.findById(id)).thenReturn(Optional.of(customer));
 
+        CustomerDTO expected = customerDTOMapper.apply(customer);
         //When
-        Customer actual = underTest.getCustomerByID(10);
+        CustomerDTO actual = underTest.getCustomerByID(10);
 
         // Then
-        assertThat(actual).isEqualTo(customer);
+        assertThat(actual).isEqualTo(expected);
     }
     @Test
     void willThrowWhenGetCustomerReturnEmptyOptional() {
